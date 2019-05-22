@@ -1,0 +1,36 @@
+5/21/19
+Team Members:
+- Natalie Leon Guerrero
+- Medina Lamkin
+- Kallen Harvey
+- Erik Nordin
+- Scott Patterson
+
+Lanugage choices:
+- Pygame to implement the snake game
+- Python to implement the ML models
+
+Thoughts on inputs:
+- General surroundings, openess of space, normalized angle from snake to apple, success of previous move
+- Also possibly compare same model with simpler inputs
+
+Quantify experiment success:
+- Longest snake
+- Accuracy: avg length of snake/number of epochs
+- Number of epoch till convergence
+
+Scope of the project:
+- Create our own snake game
+- Implement and compare 2 ML models
+- Save resulting weights/data for each AI
+
+List of suggested models to research:
+- Neural Network
+- NEAT Model
+- Reinforcement Learning
+-------------------------------------------------------------
+To Do:
+- Choose 2 machine learning models
+  - Generalize inputs for each model
+- Meet again Thursday @ 7:30pm
+=============================================================
