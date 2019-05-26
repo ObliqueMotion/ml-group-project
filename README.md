@@ -14,5 +14,12 @@ https://trello.com/b/Zz6IG6b4/ml-project-spring-2019
 **Run Game**
 * `python3 game.py`
 
+**Controls**
+* `UP` 
+* `DOWN` 
+* `LEFT` 
+* `RIGHT` 
+
 **Exit Game**
 * Press `Esc` on keyboard.
+* Click the `x` on the window.
