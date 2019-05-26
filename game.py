@@ -5,5 +5,5 @@ from game_objects.window import GameWindow
 # height = number of cells per column in GameWindow
 # speed = speed of the game (actions per second)
 if __name__ == "__main__":
-    window = GameWindow(cell_size=60, length=32, height=16, speed=10)
+    window = GameWindow(cell_size=20, length=40, height=30, speed=20)
     window.run_game_loop()

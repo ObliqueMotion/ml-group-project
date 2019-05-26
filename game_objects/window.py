@@ -56,7 +56,7 @@ class GameWindow:
 
         self.apple_cell_image = pg.image.load(
             __APPLE_CELL_PATH__
-        ).convert_alpha()
+        ).convert()
 
         self.apple_cell_image = pg.transform.scale(
             self.apple_cell_image, (self.cell_size, self.cell_size)).convert_alpha()
