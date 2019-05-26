@@ -10,6 +10,7 @@ __Y__ = 1
 # The Grid maintains the location of the snake and the apple.
 # The Grid informs the GameWindow what to draw to the screen.
 class Grid:
+    apple_location = None
     cell_size = None
     length = None
     height = None
@@ -30,9 +31,6 @@ class Grid:
         for _ in range(0, self.height):
             self.cells.append(row.copy())
 
-        print(len(self.cells))
-        print(len(self.cells[0]))
-
         start_direction = random.choice(list(Direction))
         snake_x = random.randint(0, self.length - 1)
         snake_y = random.randint(0, self.height - 1)
@@ -50,25 +48,23 @@ class Grid:
             x = random.randint(0, self.length - 1)
             y = random.randint(0, self.height - 1)
             cell = [x, y]
-        print("NEW APPLE")
-        print(cell)
         self.set_cell(cell, CellType.apple)
-        print("NEW APPLE")
+        self.apple_location = cell
 
     def next_frame(self):
         """Updates the Grid state based on the Snake's new position."""
         popped_cell = self.snake.advance()
         if self.snake_died():
             return
-
         (new_x, new_y) = self.snake.head()
-        print((new_x, new_y))
 
         if popped_cell is not None:
             self.set_cell(popped_cell, CellType.empty)
+
         if self.get_cell(new_x, new_y) == CellType.apple:
             self.snake.grow()
             self.generate_new_apple()
+
         self.set_cell(self.snake.head(), CellType.snake)
 
     def get_cell(self, x, y):
@@ -137,4 +133,40 @@ class Grid:
             count += 1
             x += 1
         return float(count) / float(self.length)
+
+    # Uses Manhattan Distance
+    def distance_from_apple(self):
+        """Returns the snake's distance from the apple as a percentage of the max possible distance it could be."""
+        (snake_x, snake_y) = self.snake.head()
+        (apple_x, apple_y) = self.apple_location
+        farthest_x_dist = max(apple_x, self.length - apple_x)
+        farthest_y_dist = max(apple_y, self.height - apple_y)
+        actual_x_dist = abs(snake_x - apple_x)
+        actual_y_dist = abs(snake_y - apple_y)
+        return 1.0 - float(actual_x_dist + actual_y_dist) / float(farthest_x_dist + farthest_y_dist)
+
+    def food_is_up(self):
+        """Returns true if the food is above the snake."""
+        (_, snake_y) = self.snake.head()
+        (_, apple_y) = self.apple_location
+        return apple_y < snake_y
+
+    def food_is_down(self):
+        """Returns true if the food is below the snake."""
+        (_, snake_y) = self.snake.head()
+        (_, apple_y) = self.apple_location
+        return apple_y > snake_y
+
+    def food_is_left(self):
+        """Returns true if the food is to the left of the snake."""
+        (snake_x, _) = self.snake.head()
+        (apple_x, _) = self.apple_location
+        return apple_x < snake_x
+
+    def food_is_right(self):
+        """Returns true if the food is to the right of the snake."""
+        (snake_x, _) = self.snake.head()
+        (apple_x, _) = self.apple_location
+        return apple_x > snake_x
+
 

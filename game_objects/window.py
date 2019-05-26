@@ -127,4 +127,19 @@ class GameWindow:
             self.perform_actions()
             self.check_for_end_game()
             self.render()
+            vert = None
+            horiz = None
+            if self.grid.food_is_up():
+                vert = "Up  "
+            elif self.grid.food_is_down():
+                vert = "Down"
+            else:
+                vert = "None"
+            if self.grid.food_is_left():
+                horiz = "Left "
+            if self.grid.food_is_right():
+                horiz = "Right"
+            else:
+                horiz = "None "
+            print("Apple is: (", vert, ",", horiz, ")\tProximity: ", str(round(self.grid.distance_from_apple(), 2)), "\t[x, y]:", self.grid.snake.head())
         self.cleanup()
