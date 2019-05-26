@@ -115,18 +115,7 @@ class GameWindow:
         if self.grid.snake_died():
             self.reset()
 
-    def run_game_loop(self):
-        """Runs the main game loop."""
-        if self.reset() == False:
-            self._exit = True
-        while(not self._exit):
-            pg.event.pump()
-            self.clock.tick(self.actions_per_second)
-            self.check_for_exit()
-            self.handle_input()
-            self.perform_actions()
-            self.check_for_end_game()
-            self.render()
+    def output_to_console(self):
             vert = None
             horiz = None
             if self.grid.food_is_up():
@@ -151,4 +140,19 @@ class GameWindow:
                 "  \tSafeLeft:", str(round(self.grid.safe_cells_left(), 2)),
                 "  \tSafeRight:", str(round(self.grid.safe_cells_right(), 2)),
             )
+
+    def run_game_loop(self):
+        """Runs the main game loop."""
+        if self.reset() == False:
+            self._exit = True
+        while(not self._exit):
+            pg.event.pump()
+            self.clock.tick(self.actions_per_second)
+            self.check_for_exit()
+            self.handle_input()
+            self.perform_actions()
+            self.check_for_end_game()
+            self.render()
+            self.output_to_console()
+
         self.cleanup()

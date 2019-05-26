@@ -44,10 +44,12 @@ class Grid:
         x = random.randint(0, self.length - 1)
         y = random.randint(0, self.height - 1)
         cell = [x, y]
+
         while cell in self.snake.body or self.get_cell(x, y) is CellType.apple:
             x = random.randint(0, self.length - 1)
             y = random.randint(0, self.height - 1)
             cell = [x, y]
+
         self.set_cell(cell, CellType.apple)
         self.apple_location = cell
 
@@ -84,7 +86,11 @@ class Grid:
     def snake_died(self):
         """Checks to see if the snake is dead."""
         (x, y) = self.snake.head()
-        return (self.snake.head() in self.snake.tail()) or (x < 0 or self.length <= x) or (y < 0 or self.height <= y)
+        return (
+            self.snake.head() in self.snake.tail()
+            or not (0 <= x < self.length) 
+            or not (0 <= y < self.height)
+        )
 
     def safe_cells_up(self):
         """Returns the percentage of safe cells directly above the Snake's head."""
@@ -139,10 +145,13 @@ class Grid:
         """Returns the snake's distance from the apple as a percentage of the max possible distance it could be."""
         (snake_x, snake_y) = self.snake.head()
         (apple_x, apple_y) = self.apple_location
+
         farthest_x_dist = max(apple_x, self.length - apple_x)
         farthest_y_dist = max(apple_y, self.height - apple_y)
+
         actual_x_dist = abs(snake_x - apple_x)
         actual_y_dist = abs(snake_y - apple_y)
+
         return 1.0 - float(actual_x_dist + actual_y_dist) / float(farthest_x_dist + farthest_y_dist)
 
     def food_is_up(self):
@@ -168,5 +177,3 @@ class Grid:
         (snake_x, _) = self.snake.head()
         (apple_x, _) = self.apple_location
         return apple_x > snake_x
-
-
