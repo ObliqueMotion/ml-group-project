@@ -31,8 +31,8 @@ class GameWindow:
             self.length = kwargs.pop('length', False)
         if 'height' in kwargs:
             self.height = kwargs.pop('height', False)
-        if 'aps' in kwargs:
-            self.actions_per_second = kwargs.pop('aps', False)
+        if 'speed' in kwargs:
+            self.actions_per_second = kwargs.pop('speed', False)
         self._exit = False
 
     def reset(self, **kwargs):
@@ -141,5 +141,14 @@ class GameWindow:
                 horiz = "Right"
             else:
                 horiz = "None "
-            print("Apple is: (", vert, ",", horiz, ")\tProximity: ", str(round(self.grid.distance_from_apple(), 2)), "\t[x, y]:", self.grid.snake.head())
+            print(
+                "Apple is: (", vert, ",", horiz,
+                ")\tProximity: ",
+                str(round(self.grid.distance_from_apple(), 2)), "\t[x, y]:",
+                self.grid.snake.head(),
+                "   \tSafeUp:", str(round(self.grid.safe_cells_up(), 2)),
+                "    \tSafeDown:", str(round(self.grid.safe_cells_down(), 2)),
+                "  \tSafeLeft:", str(round(self.grid.safe_cells_left(), 2)),
+                "  \tSafeRight:", str(round(self.grid.safe_cells_right(), 2)),
+            )
         self.cleanup()
