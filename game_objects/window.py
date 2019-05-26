@@ -137,7 +137,7 @@ class GameWindow:
                 vert = "None"
             if self.grid.food_is_left():
                 horiz = "Left "
-            if self.grid.food_is_right():
+            elif self.grid.food_is_right():
                 horiz = "Right"
             else:
                 horiz = "None "
