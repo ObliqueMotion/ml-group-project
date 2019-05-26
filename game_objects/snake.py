@@ -54,3 +54,12 @@ class Snake:
     def tail(self):
         """All (x, y) pairs except for the head of the Snake"""
         return self.body[:__LAST__]
+
+    def dist_from_tail(self, x, y):
+        count = 0
+        target = (x, y)
+        for cell in self.body:
+            if cell[0] == target[0] and cell[1] == target[1]:
+                return count
+            count += 1
+        return -1

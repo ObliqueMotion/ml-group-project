@@ -90,3 +90,51 @@ class Grid:
         (x, y) = self.snake.head()
         return (self.snake.head() in self.snake.tail()) or (x < 0 or self.length <= x) or (y < 0 or self.height <= y)
 
+    def safe_cells_up(self):
+        """Returns the percentage of safe cells directly above the Snake's head."""
+        (x, y) = self.snake.head()
+        y -= 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+                break
+            count += 1
+            y -= 1
+        return float(count) / float(self.height)
+
+    def safe_cells_down(self):
+        """Returns the percentage of safe cells directly below the Snake's head."""
+        (x, y) = self.snake.head()
+        y += 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+                break
+            count += 1
+            y += 1
+        return float(count) / float(self.height)
+
+    def safe_cells_left(self):
+        """Returns the percentage of safe cells directly to the left of the Snake's head."""
+        (x, y) = self.snake.head()
+        x -= 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+                break
+            count += 1
+            x -= 1
+        return float(count) / float(self.length)
+
+    def safe_cells_right(self):
+        """Returns the percentage of safe cells directly to the right of the Snake's head."""
+        (x, y) = self.snake.head()
+        x += 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
+                break
+            count += 1
+            x += 1
+        return float(count) / float(self.length)
+

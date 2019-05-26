@@ -85,6 +85,8 @@ class GameWindow:
             self.grid.change_direction(Direction.left)
         if (keys[K_RIGHT]):
             self.grid.change_direction(Direction.right)
+        if (keys[K_SPACE]):
+            self.grid.snake.grow()
 
     def perform_actions(self):
         """Executes all relevant game-state changes."""
