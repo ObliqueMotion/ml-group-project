@@ -26,12 +26,12 @@ class Grid:
             self.height = kwargs.pop('height', False)
 
         row = [CellType.empty] * self.length
-        self.get_cells = []
+        self.cells = []
         for _ in range(0, self.height):
-            self.get_cells.append(row.copy())
+            self.cells.append(row.copy())
 
-        print(len(self.get_cells))
-        print(len(self.get_cells[0]))
+        print(len(self.cells))
+        print(len(self.cells[0]))
 
         start_direction = random.choice(list(Direction))
         snake_x = random.randint(0, self.length - 1)
@@ -73,13 +73,13 @@ class Grid:
 
     def get_cell(self, x, y):
         """Returns the cell at the given (x, y) location."""
-        return self.get_cells[y][x]
+        return self.cells[y][x]
 
     def set_cell(self, cell, cell_type):
         """Sets a cell to a new value."""
         x = cell[__X__]
         y = cell[__Y__]
-        self.get_cells[y][x] = cell_type
+        self.cells[y][x] = cell_type
 
     def change_direction(self, direction):
         """Changes the snake's direction to a new direction."""
@@ -89,3 +89,4 @@ class Grid:
         """Checks to see if the snake is dead."""
         (x, y) = self.snake.head()
         return (self.snake.head() in self.snake.tail()) or (x < 0 or self.length <= x) or (y < 0 or self.height <= y)
+
