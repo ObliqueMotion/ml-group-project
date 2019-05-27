@@ -93,8 +93,75 @@ class Grid:
         )
 
     def safe_cells_up(self):
-        """Returns the percentage of safe cells directly above the Snake's head."""
+        """Returns the percentage of safe cells directly above the Snake's head relative to the snake's location."""
         (x, y) = self.snake.head()
+        max_dist = y
+        y -= 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+                break
+            count += 1
+            y -= 1
+        if max_dist == 0:
+            return 0.0
+        else:
+            return float(count) / float(max_dist)
+
+    def safe_cells_down(self):
+        """Returns the percentage of safe cells directly below the Snake's head relative to the snake's location."""
+        (x, y) = self.snake.head()
+        max_dist = self.height - y - 1
+        y += 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+                break
+            count += 1
+            y += 1
+        if max_dist == 0:
+            return 0.0
+        else:
+            return float(count) / float(max_dist)
+
+    def safe_cells_left(self):
+        """Returns the percentage of safe cells directly to the left of the Snake's head relative to the snake's location."""
+        (x, y) = self.snake.head()
+        max_dist = x
+        x -= 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+                break
+            count += 1
+            x -= 1
+        if max_dist == 0:
+            return 0.0
+        else:
+            return float(count) / float(max_dist)
+
+
+    def safe_cells_right(self):
+        """Returns the percentage of safe cells directly to the right of the Snake's head relative to the snake's location."""
+        (x, y) = self.snake.head()
+        max_dist = self.length - x - 1
+        x += 1
+        count = 0
+        while(x in range(0, self.length) and y in range(0, self.height)):
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
+                break
+            count += 1
+            x += 1
+        if max_dist == 0:
+            return 0.0
+        else:
+            return float(count) / float(max_dist)
+
+
+    def safe_cells_up_global(self):
+        """Returns the percentage of safe cells directly above the Snake's head relative to the board size."""
+        (x, y) = self.snake.head()
+        max_dist = y
         y -= 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
@@ -104,9 +171,11 @@ class Grid:
             y -= 1
         return float(count) / float(self.height)
 
-    def safe_cells_down(self):
-        """Returns the percentage of safe cells directly below the Snake's head."""
+
+    def safe_cells_down_global(self):
+        """Returns the percentage of safe cells directly below the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
+        max_dist = self.height - y - 1
         y += 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
@@ -116,9 +185,11 @@ class Grid:
             y += 1
         return float(count) / float(self.height)
 
-    def safe_cells_left(self):
-        """Returns the percentage of safe cells directly to the left of the Snake's head."""
+
+    def safe_cells_left_global(self):
+        """Returns the percentage of safe cells directly to the left of the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
+        max_dist = x
         x -= 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
@@ -128,8 +199,9 @@ class Grid:
             x -= 1
         return float(count) / float(self.length)
 
-    def safe_cells_right(self):
-        """Returns the percentage of safe cells directly to the right of the Snake's head."""
+
+    def safe_cells_right_global(self):
+        """Returns the percentage of safe cells directly to the right of the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
         x += 1
         count = 0

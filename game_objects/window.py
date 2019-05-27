@@ -135,10 +135,14 @@ class GameWindow:
                 ")\tProximity: ",
                 str(round(self.grid.distance_from_apple(), 2)), "\t[x, y]:",
                 self.grid.snake.head(),
-                "   \tSafeUp:", str(round(self.grid.safe_cells_up(), 2)),
-                "    \tSafeDown:", str(round(self.grid.safe_cells_down(), 2)),
-                "  \tSafeLeft:", str(round(self.grid.safe_cells_left(), 2)),
-                "  \tSafeRight:", str(round(self.grid.safe_cells_right(), 2)),
+                "   \tUp: (", str(round(self.grid.safe_cells_up(), 2)),
+                ",", str(round(self.grid.safe_cells_up_global(), 2)), ")"
+                "    \tDown: (", str(round(self.grid.safe_cells_down(), 2)),
+                ",", str(round(self.grid.safe_cells_down_global(), 2)), ")"
+                "  \tLeft: (", str(round(self.grid.safe_cells_left(), 2)),
+                ",", str(round(self.grid.safe_cells_left_global(), 2)), ")"
+                "  \tRight: (", str(round(self.grid.safe_cells_right(), 2)),
+                ",", str(round(self.grid.safe_cells_right_global(), 2)), ")"
             )
 
     def run_game_loop(self):
