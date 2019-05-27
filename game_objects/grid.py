@@ -99,7 +99,7 @@ class Grid:
         y -= 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
-            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
                 break
             count += 1
             y -= 1
@@ -115,7 +115,7 @@ class Grid:
         y += 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
-            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
                 break
             count += 1
             y += 1
@@ -131,7 +131,7 @@ class Grid:
         x -= 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
-            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
                 break
             count += 1
             x -= 1
@@ -165,7 +165,7 @@ class Grid:
         y -= 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
-            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
                 break
             count += 1
             y -= 1
@@ -179,7 +179,7 @@ class Grid:
         y += 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
-            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
                 break
             count += 1
             y += 1
@@ -193,7 +193,7 @@ class Grid:
         x -= 1
         count = 0
         while(x in range(0, self.length) and y in range(0, self.height)):
-            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y) + 1:
+            if self.get_cell(x, y) is CellType.snake and count < self.snake.dist_from_tail(x, y):
                 break
             count += 1
             x -= 1
