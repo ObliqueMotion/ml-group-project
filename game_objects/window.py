@@ -72,8 +72,7 @@ class GameWindow:
             if event.type == QUIT:
                 self._exit = True
 
-    # TODO: Add inputs from ML models.
-    def handle_input(self):
+    def handle_keyboard_input(self):
         """Checks for input to the game."""
         keys = pg.key.get_pressed()
 
@@ -87,9 +86,14 @@ class GameWindow:
             self.grid.change_direction(Direction.right)
         if (keys[K_SPACE]):
             self.grid.snake.grow()
+        if (keys[K_RIGHTBRACKET]):
+            self.actions_per_second += 1
+        if (keys[K_LEFTBRACKET]):
+            self.actions_per_second -= 1
 
-    def perform_actions(self):
+    def perform_keyboard_actions(self):
         """Executes all relevant game-state changes."""
+        self.handle_keyboard_input()
         self.grid.next_frame()
 
     def render(self):
@@ -118,22 +122,22 @@ class GameWindow:
     def output_to_console(self):
             vert = None
             horiz = None
-            if self.grid.food_is_up():
+            if self.grid.apple_is_up():
                 vert = "Up  "
-            elif self.grid.food_is_down():
+            elif self.grid.apple_is_down():
                 vert = "Down"
             else:
                 vert = "None"
-            if self.grid.food_is_left():
+            if self.grid.apple_is_left():
                 horiz = "Left "
-            elif self.grid.food_is_right():
+            elif self.grid.apple_is_right():
                 horiz = "Right"
             else:
                 horiz = "None "
             print(
                 "Apple is: (", vert, ",", horiz,
                 ")\tProximity: ",
-                str(round(self.grid.distance_from_apple(), 2)), "\t[x, y]:",
+                str(round(self.grid.proximity_to_apple(), 2)), "\t[x, y]:",
                 self.grid.snake.head(),
                 "   \tUp: (", str(round(self.grid.safe_cells_up(), 2)),
                 ",", str(round(self.grid.safe_cells_up_global(), 2)), ")"
@@ -153,8 +157,7 @@ class GameWindow:
             pg.event.pump()
             self.clock.tick(self.actions_per_second)
             self.check_for_exit()
-            self.handle_input()
-            self.perform_actions()
+            self.perform_keyboard_actions()
             self.check_for_end_game()
             self.render()
             self.output_to_console()
