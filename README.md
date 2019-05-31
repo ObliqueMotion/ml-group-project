@@ -10,7 +10,7 @@ https://trello.com/b/Zz6IG6b4/ml-project-spring-2019
 
 **Instal Dependencies**
 * `pip3 install pygame`
-* `pip3 install pytorch`
+* `pip3 install torch`
 
 **Run Game**
 * Play a human-controlled game.
