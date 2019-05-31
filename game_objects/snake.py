@@ -13,10 +13,19 @@ class Snake:
     increase_length = None
 
     def __init__(self, **kwargs):
-        if 'x' in kwargs and 'y' in kwargs:
-            self.body = [[kwargs.pop('x', False), kwargs.pop('y', False)]]
-        if 'direction' in kwargs:
+        if 'x' in kwargs and 'y' in kwargs and 'direction' in kwargs:
+            x = kwargs.pop('x', False)
+            y = kwargs.pop('y', False)
             self.direction = kwargs.pop('direction', False)
+            if self.direction == Direction.up:
+                self.body = [[x, y + 2], [x, y + 1], [x, y]]
+            elif self.direction == Direction.down:
+                self.body = [[x, y - 2], [x, y - 1], [x, y]]
+            elif self.direction == Direction.left:
+                self.body = [[x + 2, y], [x + 1, y], [x, y]]
+            elif self.direction == Direction.right:
+                self.body = [[x - 2, y], [x - 1, y], [x, y]]
+
         self.increase_length = False
 
     def advance(self):

@@ -32,11 +32,15 @@ class Grid:
             self.cells.append(row.copy())
 
         start_direction = random.choice(list(Direction))
-        snake_x = random.randint(0, self.length - 1)
-        snake_y = random.randint(0, self.height - 1)
+        snake_x = random.randint(3, self.length - 4)
+        snake_y = random.randint(3, self.height - 4)
+        print(snake_x, snake_y)
 
         self.snake = Snake(x=snake_x, y=snake_y, direction=start_direction)
-        self.set_cell([snake_x, snake_y], CellType.snake)
+
+        for cell in self.snake.body:
+            self.set_cell(cell, CellType.snake)
+
         self.generate_new_apple()
 
     def generate_new_apple(self):
@@ -213,8 +217,8 @@ class Grid:
         return float(count) / float(self.length)
 
     # Uses Manhattan Distance
-    def distance_from_apple(self):
-        """Returns the snake's distance from the apple as a percentage of the max possible distance it could be."""
+    def proximity_to_apple(self):
+        """Returns the snake's closeness to the apple as a percentage of the max possible distance it could be."""
         (snake_x, snake_y) = self.snake.head()
         (apple_x, apple_y) = self.apple_location
 
@@ -226,26 +230,26 @@ class Grid:
 
         return 1.0 - float(actual_x_dist + actual_y_dist) / float(farthest_x_dist + farthest_y_dist)
 
-    def food_is_up(self):
-        """Returns true if the food is above the snake."""
+    def apple_is_up(self):
+        """Returns true if the apple is above the snake."""
         (_, snake_y) = self.snake.head()
         (_, apple_y) = self.apple_location
         return apple_y < snake_y
 
-    def food_is_down(self):
-        """Returns true if the food is below the snake."""
+    def apple_is_down(self):
+        """Returns true if the apple is below the snake."""
         (_, snake_y) = self.snake.head()
         (_, apple_y) = self.apple_location
         return apple_y > snake_y
 
-    def food_is_left(self):
-        """Returns true if the food is to the left of the snake."""
+    def apple_is_left(self):
+        """Returns true if the apple is to the left of the snake."""
         (snake_x, _) = self.snake.head()
         (apple_x, _) = self.apple_location
         return apple_x < snake_x
 
-    def food_is_right(self):
-        """Returns true if the food is to the right of the snake."""
+    def apple_is_right(self):
+        """Returns true if the apple is to the right of the snake."""
         (snake_x, _) = self.snake.head()
         (apple_x, _) = self.apple_location
         return apple_x > snake_x
