@@ -33,6 +33,10 @@ https://trello.com/b/Zz6IG6b4/ml-project-spring-2019
     * `[`
 * Grow Snake (Debug)
     * `SPACE`
+* Stop Training
+    * `s`
+* Start Training
+    * `t` (on by default)
 
 **Exit Game**
 * Press `Esc` on keyboard.
