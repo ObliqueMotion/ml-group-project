@@ -9,6 +9,10 @@ length = 40
 height = 30
 # speed of the game (actions per second)
 speed = 20
+# dimensions of split-brain neural network
+dimensions = [4, 100, 50, 1]
+# learning rate of split-brain neural network
+learning_rate=0.01
 
 if __name__ == "__main__":
     window = GameWindow(
@@ -16,7 +20,7 @@ if __name__ == "__main__":
         length=length,
         height=height,
         speed=speed,
-        sb_dimensions=[4, 100, 50, 1],
-        sb_lr=0.01
+        sb_dimensions=dimensions,
+        sb_lr=learning_rate
     )
     window.play_split_brain_network_game()

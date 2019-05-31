@@ -19,6 +19,8 @@ class GameWindow:
     height = None
     length = None
     surface = None
+    is_training = None
+    training_pressed = None
     cell_size = None
     actions_per_second = None
     split_brain_network = None
@@ -37,6 +39,8 @@ class GameWindow:
         if 'speed' in kwargs:
             self.actions_per_second = kwargs.pop('speed', False)
         self._exit = False
+        self.is_training = True
+        self.trainig_pressed = False
 
 
         # For split-brain network
@@ -100,6 +104,16 @@ class GameWindow:
             self.actions_per_second += 1
         if (keys[K_LEFTBRACKET]):
             self.actions_per_second -= 1
+        if (keys[K_t]):
+            self.is_training = True
+            print("========================================================================")
+            print("Training: ON")
+            print("========================================================================")
+        if (keys[K_s]):
+            self.is_training = False
+            print("========================================================================")
+            print("Training: OFF")
+            print("========================================================================")
 
     def perform_keyboard_actions(self):
         """Executes all relevant game-state changes."""
@@ -148,16 +162,18 @@ class GameWindow:
         self.grid.change_direction(new_direction)
         got_apple = self.grid.next_frame()
         new_proximity = self.grid.proximity_to_apple()
-        reward = torch.tensor([-0.5])
 
-        if self.grid.snake_died():
-            reward = torch.tensor([-1.0])
-        elif got_apple:
-            reward = torch.tensor([1.0])
-        elif new_proximity > proximity:
-            reward = torch.tensor([0.8])
+        if self.is_training:
+            reward = torch.tensor([-0.5])
+
+            if self.grid.snake_died():
+                reward = torch.tensor([-1.0])
+            elif got_apple:
+                reward = torch.tensor([1.0])
+            elif new_proximity > proximity:
+                reward = torch.tensor([0.8])
         
-        self.split_brain_network.update(reward)
+            self.split_brain_network.update(reward)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
