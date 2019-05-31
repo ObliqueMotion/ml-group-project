@@ -1,6 +1,8 @@
+import torch
 import pygame as pg
 from pygame.locals import *
 from pygame.color import Color
+from models.split_brain import SplitBrainNetwork
 from game_objects.grid import Grid
 from game_objects.cell import CellType
 from game_objects.direction import Direction
@@ -19,6 +21,7 @@ class GameWindow:
     surface = None
     cell_size = None
     actions_per_second = None
+    split_brain_network = None
 
     def __init__(self, **kwargs):
         """Initializes the game window."""
@@ -34,6 +37,13 @@ class GameWindow:
         if 'speed' in kwargs:
             self.actions_per_second = kwargs.pop('speed', False)
         self._exit = False
+
+
+        # For split-brain network
+        if "sb_dimensions" and "sb_lr" in kwargs:
+            dimensions = kwargs.pop("sb_dimensions", False)
+            lr = kwargs.pop("sb_lr", False)
+            self.split_brain_network = SplitBrainNetwork(dimensions=dimensions, lr=lr)
 
     def reset(self, **kwargs):
         """Resets the game state with a new snake and apple in random positions."""
@@ -96,6 +106,59 @@ class GameWindow:
         self.handle_keyboard_input()
         self.grid.next_frame()
 
+    def perform_split_brain_actions(self):
+        """Performs actions using the SplitBrainNetwork."""
+        proximity = self.grid.proximity_to_apple()
+        inputs = [
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_up_global(),
+                    self.grid.safe_cells_up(),
+                    self.grid.apple_is_up_safe(0.5)
+                ]
+            ]),
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_down_global(),
+                    self.grid.safe_cells_down(),
+                    self.grid.apple_is_down_safe(0.5)
+                ]
+            ]),
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_left_global(),
+                    self.grid.safe_cells_left(),
+                    self.grid.apple_is_left_safe(0.5)
+                ]
+            ]),
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_right_global(),
+                    self.grid.safe_cells_right(),
+                    self.grid.apple_is_right_safe(0.5)
+                ]
+            ])
+        ]
+
+        new_direction = self.split_brain_network.eval(inputs)
+        self.grid.change_direction(new_direction)
+        got_apple = self.grid.next_frame()
+        new_proximity = self.grid.proximity_to_apple()
+        reward = torch.tensor([-0.5])
+
+        if self.grid.snake_died():
+            reward = torch.tensor([-1.0])
+        elif got_apple:
+            reward = torch.tensor([1.0])
+        elif new_proximity > proximity:
+            reward = torch.tensor([0.8])
+        
+        self.split_brain_network.update(reward)
+
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
         self._surface.fill(Color('black'))
@@ -119,38 +182,39 @@ class GameWindow:
         if self.grid.snake_died():
             self.reset()
 
-    def output_to_console(self):
-            vert = None
-            horiz = None
-            if self.grid.apple_is_up():
-                vert = "Up  "
-            elif self.grid.apple_is_down():
-                vert = "Down"
-            else:
-                vert = "None"
-            if self.grid.apple_is_left():
-                horiz = "Left "
-            elif self.grid.apple_is_right():
-                horiz = "Right"
-            else:
-                horiz = "None "
-            print(
-                "Apple is: (", vert, ",", horiz,
-                ")\tProximity: ",
-                str(round(self.grid.proximity_to_apple(), 2)), "\t[x, y]:",
-                self.grid.snake.head(),
-                "   \tUp: (", str(round(self.grid.safe_cells_up(), 2)),
-                ",", str(round(self.grid.safe_cells_up_global(), 2)), ")"
-                "    \tDown: (", str(round(self.grid.safe_cells_down(), 2)),
-                ",", str(round(self.grid.safe_cells_down_global(), 2)), ")"
-                "  \tLeft: (", str(round(self.grid.safe_cells_left(), 2)),
-                ",", str(round(self.grid.safe_cells_left_global(), 2)), ")"
-                "  \tRight: (", str(round(self.grid.safe_cells_right(), 2)),
-                ",", str(round(self.grid.safe_cells_right_global(), 2)), ")"
-            )
+    def debug_to_console(self):
+        """Outputs Debug information to the console."""
+        vert = None
+        horiz = None
+        if self.grid.apple_is_up():
+            vert = "Up  "
+        elif self.grid.apple_is_down():
+            vert = "Down"
+        else:
+            vert = "None"
+        if self.grid.apple_is_left():
+            horiz = "Left "
+        elif self.grid.apple_is_right():
+            horiz = "Right"
+        else:
+            horiz = "None "
+        print(
+            "Apple is: (", vert, ",", horiz,
+            ")\tProximity: ",
+            str(round(self.grid.proximity_to_apple(), 2)), "\t[x, y]:",
+            self.grid.snake.head(),
+            "   \tUp: (", str(round(self.grid.safe_cells_up(), 2)),
+            ",", str(round(self.grid.safe_cells_up_global(), 2)), ")"
+            "    \tDown: (", str(round(self.grid.safe_cells_down(), 2)),
+            ",", str(round(self.grid.safe_cells_down_global(), 2)), ")"
+            "  \tLeft: (", str(round(self.grid.safe_cells_left(), 2)),
+            ",", str(round(self.grid.safe_cells_left_global(), 2)), ")"
+            "  \tRight: (", str(round(self.grid.safe_cells_right(), 2)),
+            ",", str(round(self.grid.safe_cells_right_global(), 2)), ")"
+        )
 
-    def run_game_loop(self):
-        """Runs the main game loop."""
+    def play_keyboard_input_game(self):
+        """Runs the main game loop using player input."""
         if self.reset() == False:
             self._exit = True
         while(not self._exit):
@@ -160,6 +224,22 @@ class GameWindow:
             self.perform_keyboard_actions()
             self.check_for_end_game()
             self.render()
-            self.output_to_console()
+            self.debug_to_console()
+
+        self.cleanup()
+
+    def play_split_brain_network_game(self):
+        """Runs the main game loop using the SplitBrainNetwork."""
+        if self.reset() == False:
+            self._exit = True
+        while(not self._exit):
+            pg.event.pump()
+            self.clock.tick(self.actions_per_second)
+            self.check_for_exit()
+            self.handle_keyboard_input()
+            self.perform_split_brain_actions()
+            self.split_brain_network.display_outputs()
+            self.check_for_end_game()
+            self.render()
 
         self.cleanup()
