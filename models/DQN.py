@@ -35,7 +35,7 @@ class DQN:
     def eval(self, input):
         """Evaluates the input of a network, outputing some confidence in range [-1.0, 1.0]"""
         self.output = self.network(input)
-        return float(self.output)
+        return self.output
 
     def update(self, target):
         """Updates the weights based on a provided target in range [-1.0, 1.0]"""
@@ -43,3 +43,4 @@ class DQN:
         self.optimizer.zero_grad()  # look this up later
         self.loss.backward()
         self.optimizer.step()
+
