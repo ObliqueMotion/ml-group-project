@@ -1,3 +1,5 @@
+import matplotlib
+import matplotlib.pyplot as plt
 import math
 import torch
 import copy
@@ -24,12 +26,16 @@ __RIGHT__  = 3
 class GameWindow:
     grid = None
     clock = None
+    score = None
+    scores = None
     height = None
     length = None
+    actions = None
     surface = None
+    cell_size = None
     is_training = None
     training_pressed = None
-    cell_size = None
+    actions_per_score = None
     actions_per_second = None
     split_brain_network = None
 
@@ -49,7 +55,10 @@ class GameWindow:
         self._exit = False
         self.is_training = True
         self.trainig_pressed = False
-
+        self.score = 0
+        self.actions = 0
+        self.scores = []
+        self.actions_per_score = []
 
         # For split-brain network
         if "sb_dimensions" and "sb_lr" in kwargs:
@@ -62,6 +71,16 @@ class GameWindow:
             dimensions = kwargs.pop("dqn_dimensions", False)
             lr = kwargs.pop("dqn_lr", False)
             self.dqn = DQN(dimensions=dimensions, lr=lr)
+
+    def plot_scores(self):
+        plt.figure(2)
+        plt.clf()
+        plt.title('Training...')
+        plt.xlabel('Episode')
+        plt.ylabel('Score')
+        plt.plot(self.scores)
+        plt.plot(self.actions_per_score)
+        plt.pause(0.001)  # pause a bit so that plots are update
 
     def reset(self, **kwargs):
         """Resets the game state with a new snake and apple in random positions."""
@@ -88,7 +107,9 @@ class GameWindow:
 
         self.apple_cell_image = pg.transform.scale(
             self.apple_cell_image, (self.cell_size, self.cell_size)).convert_alpha()
-
+        
+        self.score = 0
+        self.actions = 0
         self._exit = False
 
     def check_for_exit(self):
@@ -165,8 +186,6 @@ class GameWindow:
                 self.grid.change_direction(Direction.right)
         print(output)
         print(max(output))
-        got_apple = self.grid.next_frame()
-        new_proximity = self.grid.proximity_to_apple()
 
         if self.is_training:
             reward = torch.tensor([
@@ -181,6 +200,12 @@ class GameWindow:
             ])
         
             self.dqn.update(reward)
+
+        got_apple = self.grid.next_frame()
+        self.actions += 1
+        if got_apple:
+            self.score += 1
+
 
     def future_move_reward(self, direction):
         proximity = self.grid.proximity_to_apple()
@@ -273,6 +298,10 @@ class GameWindow:
     def check_for_end_game(self):
         """Checks to see if the snake has died."""
         if self.grid.snake_died():
+            self.scores.append(self.score)
+            if self.score > 0:
+                self.actions_per_score.append(self.actions / self.score)
+            self.plot_scores()
             self.reset()
 
     def debug_to_console(self):
