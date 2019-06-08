@@ -10,7 +10,7 @@ height = 30
 # speed of the game (actions per second)
 speed = 20
 # dimensions of split-brain neural network
-dimensions = [13, 1000, 100, 10, 4]
+dimensions = [13, 900, 600, 300, 30, 4]
 # learning rate of split-brain neural network
 learning_rate=0.01
 

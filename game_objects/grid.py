@@ -100,6 +100,16 @@ class Grid:
             or not (0 <= y < self.height)
         )
 
+    def safe_cells(self, direction):
+        if direction == Direction.up:
+            return self.safe_cells_up()
+        elif direction == Direction.down:
+            return self.safe_cells_down()
+        elif direction == Direction.left:
+            return self.safe_cells_left()
+        else:
+            return self.safe_cells_right()
+
     def safe_cells_up(self):
         """Returns the percentage of safe cells directly above the Snake's head relative to the snake's location."""
         (x, y) = self.snake.head()

@@ -30,12 +30,12 @@ class GameWindow:
     scores = None
     height = None
     length = None
+    avrages = None
     actions = None
     surface = None
     cell_size = None
     is_training = None
     training_pressed = None
-    actions_per_score = None
     actions_per_second = None
     split_brain_network = None
 
@@ -58,7 +58,7 @@ class GameWindow:
         self.score = 0
         self.actions = 0
         self.scores = []
-        self.actions_per_score = []
+        self.averages = []
 
         # For split-brain network
         if "sb_dimensions" and "sb_lr" in kwargs:
@@ -79,7 +79,7 @@ class GameWindow:
         plt.xlabel('Episode')
         plt.ylabel('Score')
         plt.plot(self.scores)
-        plt.plot(self.actions_per_score)
+        plt.plot(self.averages)
         plt.pause(0.001)  # pause a bit so that plots are update
 
     def reset(self, **kwargs):
@@ -220,7 +220,7 @@ class GameWindow:
         elif grid.proximity_to_apple() > proximity:
             return 0.8
         else:
-            return 0
+            return 0.5 * grid.safe_cells(direction)
 
     def perform_split_brain_actions(self):
         """Performs actions using the SplitBrainNetwork."""
@@ -299,8 +299,7 @@ class GameWindow:
         """Checks to see if the snake has died."""
         if self.grid.snake_died():
             self.scores.append(self.score)
-            if self.score > 0:
-                self.actions_per_score.append(self.actions / self.score)
+            self.averages.append(sum(self.scores) / len(self.scores))
             self.plot_scores()
             self.reset()
 
