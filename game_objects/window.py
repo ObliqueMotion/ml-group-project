@@ -24,6 +24,7 @@ __RIGHT__  = 3
 # The GameWindow is responsible for running the main game loop.
 # The GameWindow is responsible for drawing the game state to the screen.
 class GameWindow:
+    dqn = None
     grid = None
     clock = None
     score = None
@@ -67,16 +68,18 @@ class GameWindow:
             self.split_brain_network = SplitBrainNetwork(dimensions=dimensions, lr=lr)
         
         # DQN
-        if "dqn_dimensions" and "dqn_lr" in kwargs:
+        if "dqn_dimensions" and "dqn_lr" and "dqn_batch_size" and "dqn_sample_size" in kwargs:
             dimensions = kwargs.pop("dqn_dimensions", False)
             lr = kwargs.pop("dqn_lr", False)
-            self.dqn = DQN(dimensions=dimensions, lr=lr)
+            batch_size = kwargs.pop("dqn_batch_size", False)
+            sample_size = kwargs.pop("dqn_sample_size", False)
+            self.dqn = DQN(dimensions=dimensions, lr=lr, batch_size=batch_size, sample_size=sample_size)
 
     def plot_scores(self):
         plt.figure(2)
         plt.clf()
         plt.title('Training...')
-        plt.xlabel('Episode')
+        plt.xlabel('Games')
         plt.ylabel('Score')
         plt.plot(self.scores)
         plt.plot(self.averages)
@@ -199,7 +202,8 @@ class GameWindow:
                 # self.grid.safe_cells_right_global()
             ])
         
-            self.dqn.update(reward)
+            self.dqn.add_to_replay_memory(inputs, reward)
+            self.dqn.update()
 
         got_apple = self.grid.next_frame()
         self.actions += 1
