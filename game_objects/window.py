@@ -212,19 +212,20 @@ class GameWindow:
 
 
     def future_move_reward(self, direction):
-        proximity = self.grid.proximity_to_apple()
+        old_proximity = self.grid.proximity_to_apple()
         grid = copy.deepcopy(self.grid)
         grid.change_direction(direction)
         got_apple = grid.next_frame()
+        safe_cells = grid.safe_cells(direction)
 
         if grid.snake_died():
             return -1.0
         elif got_apple:
             return 1.0
-        elif grid.proximity_to_apple() > proximity and grid.safe_cells(direction) >= 0.25:
+        elif grid.proximity_to_apple() > old_proximity and safe_cells >= 0.25:
             return 0.8
         else:
-            return 0.5 * grid.safe_cells(direction)
+            return 0.5 * safe_cells
 
     def perform_split_brain_actions(self):
         """Performs actions using the SplitBrainNetwork."""
