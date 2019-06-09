@@ -222,7 +222,7 @@ class GameWindow:
             return -1.0
         elif got_apple:
             return 1.0
-        elif grid.proximity_to_apple() > old_proximity and safe_cells >= 0.25:
+        elif grid.proximity_to_apple() > old_proximity and safe_cells >= 0.5:
             return 0.8
         else:
             return 0.5 * safe_cells
