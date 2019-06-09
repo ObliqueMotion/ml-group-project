@@ -201,7 +201,7 @@ class GameWindow:
                 # self.grid.safe_cells_left_global(),
                 # self.grid.safe_cells_right_global()
             ])
-        
+
             self.dqn.add_to_replay_memory(inputs, reward)
             self.dqn.update()
 
@@ -303,7 +303,8 @@ class GameWindow:
         """Checks to see if the snake has died."""
         if self.grid.snake_died():
             self.scores.append(self.score)
-            self.averages.append(sum(self.scores) / len(self.scores))
+            if self.score >= 1:
+                self.averages.append(sum(self.scores) / (len(self.averages) + 1))
             self.plot_scores()
             self.reset()
 
