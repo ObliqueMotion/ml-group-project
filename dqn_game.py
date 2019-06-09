@@ -16,7 +16,7 @@ learning_rate=0.01
 # the number of states to collect in replay memory before updating.
 batch_size = 100
 # the number of samples to draw from the batch during training.
-sample_size = 40
+sample_size = 25
 
 if __name__ == "__main__":
     window = GameWindow(
