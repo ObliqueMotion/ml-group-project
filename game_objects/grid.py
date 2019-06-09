@@ -2,9 +2,11 @@ import random
 from game_objects.snake import Snake
 from game_objects.cell import CellType
 from game_objects.direction import Direction
+from game_objects.reward import reward
 
 __X__ = 0
 __Y__ = 1
+
 
 # Grid is the central controller of the game.
 # The Grid maintains the location of the snake and the apple.
@@ -16,6 +18,7 @@ class Grid:
     height = None
     cells = None
     snake = None
+    rewards = None
 
     def __init__(self, **kwargs):
         """Creates a new 2D grid of cells and adds a random Snake and a random apple."""
@@ -42,6 +45,8 @@ class Grid:
             self.set_cell(cell, CellType.snake)
 
         self.generate_new_apple()
+
+        self.rewards = rewardTable(self.length, self.height)
 
     def generate_new_apple(self):
         """Generates a new apple in a random position that is not in the Snake or in another apple"""

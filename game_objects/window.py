@@ -4,6 +4,7 @@ from pygame.color import Color
 from game_objects.grid import Grid
 from game_objects.cell import CellType
 from game_objects.direction import Direction
+from game_objects.qTable import qTable
 
 __SNAKE_CELL_PATH__ = "images/white_square.png"
 __APPLE_CELL_PATH__ = "images/green_square.png"
@@ -19,6 +20,7 @@ class GameWindow:
     surface = None
     cell_size = None
     actions_per_second = None
+    agent = None
 
     def __init__(self, **kwargs):
         """Initializes the game window."""
@@ -34,6 +36,8 @@ class GameWindow:
         if 'speed' in kwargs:
             self.actions_per_second = kwargs.pop('speed', False)
         self._exit = False
+
+        self.agent = qTable(self.length, self.height, 0.5, 0.8)
 
     def reset(self, **kwargs):
         """Resets the game state with a new snake and apple in random positions."""
@@ -153,10 +157,12 @@ class GameWindow:
         """Runs the main game loop."""
         if self.reset() == False:
             self._exit = True
+        print(self.agent.table)
         while(not self._exit):
             pg.event.pump()
             self.clock.tick(self.actions_per_second)
             self.check_for_exit()
+            # This will eventually be replaced with Q table lookup
             self.perform_keyboard_actions()
             self.check_for_end_game()
             self.render()
