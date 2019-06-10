@@ -46,7 +46,7 @@ class Grid:
 
         self.generate_new_apple()
 
-        self.rewards = rewardTable(self.length, self.height)
+        self.rewards = reward()
 
     def generate_new_apple(self):
         """Generates a new apple in a random position that is not in the Snake or in another apple"""
