@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from game_objects.direction import Direction
 
 __X__ = 0
 __Y__ = 1
@@ -46,4 +47,4 @@ class qTable():
             """gets the max qtable value from all possible directions for deciding which direction to go"""
             maxDir = curState.index(max(curState))
         """direction corosponding to the direction enum"""
-        return maxDir
+        return Direction(maxDir)

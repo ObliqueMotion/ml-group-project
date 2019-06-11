@@ -72,3 +72,13 @@ class Snake:
                 return count
             count += 1
         return -1
+
+    def dir_to_int(self):
+        if self.direction == Direction.up:
+            return 0
+        elif self.direction == Direction.down:
+            return 1
+        elif self.direction == Direction.left:
+            return 2
+        else:
+            return 3
