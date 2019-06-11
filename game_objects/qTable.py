@@ -22,13 +22,16 @@ class qTable():
     def update(self, prevCell, curCell, direction, reward):
         px = prevCell[__X__]
         py = prevCell[__Y__]
-        cx = curCell[__X__]
-        cy = curCell[__Y__]
         """Update current cell with new Q value"""
-        self.table[px * py][direction] = (self.table[px * py][direction] +
-                                          self.learnRate * (reward + self.discountRate *
-                                          np.max(self.table[cx * cy]) -
-                                          self.table[px * py][direction]))
+        self.table[px * py][direction] = (1 - self.learnRate) * self.table[px * py][direction] + self.learnRate * (reward + self.discountRate * self.nextAction(curCell))
+
+    def nextAction(self, curCell):
+        if curCell is None:
+            return 0
+        else:
+            cx = curCell[__X__]
+            cy = curCell[__Y__]
+            return max(self.table[cx * cy])
 
     """coordinate is a list of X and Y located at head of snake"""
     # Can possibly take the discountRate comparison out for testing purposes

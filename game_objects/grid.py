@@ -2,7 +2,6 @@ import random
 from game_objects.snake import Snake
 from game_objects.cell import CellType
 from game_objects.direction import Direction
-from game_objects.reward import reward
 
 __X__ = 0
 __Y__ = 1

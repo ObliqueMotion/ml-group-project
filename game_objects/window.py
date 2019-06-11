@@ -12,6 +12,7 @@ from game_objects.cell import CellType
 from game_objects.direction import Direction
 from game_objects.qTable import qTable
 from models.DQN import DQN
+from game_objects.reward import reward
 
 __SNAKE_CELL_PATH__ = "images/white_square.png"
 __APPLE_CELL_PATH__ = "images/green_square.png"
@@ -287,8 +288,25 @@ class GameWindow:
     # TODO: Finish this function
     def perform_QLearn_actions(self, table):
         prevLoc = self.grid.snake.head()
-        self.grid.change_direction(table.getMax())
-        curLoc = self.grid.snake.head()
+        toApplePrev = self.grid.proximity_to_apple()
+        self.grid.snake.direction = table.getMax(prevLoc)
+        got_apple = self.grid.next_frame()
+        # if snake died, penalty -10
+        if self.grid.snake_died():
+            table.update(prevCell=prevLoc, curCell=None, direction=self.grid.snake.direction, reward=-10)
+        # if snake got apple, reward 50
+        elif got_apple is True:
+            curLoc = self.grid.snake.head()
+            table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.direction, reward=50)
+        else:
+            curLoc = self.grid.snake.head()
+            toAppleCur = self.grid.proximity_to_apple()
+            # if snake got closer to apple, reward 1
+            if toApplePrev < toAppleCur:
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.direction, reward=1)
+            # if snake got farther to apple, penalty -1
+            else:
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.direction, reward=-1)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
