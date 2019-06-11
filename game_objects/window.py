@@ -10,19 +10,16 @@ from models.split_brain import SplitBrainNetwork
 from game_objects.grid import Grid
 from game_objects.cell import CellType
 from game_objects.direction import Direction
-<<<<<<< HEAD
 from game_objects.qTable import qTable
-=======
 from models.DQN import DQN
->>>>>>> master
 
 __SNAKE_CELL_PATH__ = "images/white_square.png"
 __APPLE_CELL_PATH__ = "images/green_square.png"
 
-__UP__     = 0
-__DOWN__   = 1
-__LEFT__   = 2
-__RIGHT__  = 3
+__UP__ = 0
+__DOWN__ = 1
+__LEFT__ = 2
+__RIGHT__ = 3
 
 
 # The GameWindow is responsible for running the main game loop.
@@ -70,7 +67,7 @@ class GameWindow:
             dimensions = kwargs.pop("sb_dimensions", False)
             lr = kwargs.pop("sb_lr", False)
             self.split_brain_network = SplitBrainNetwork(dimensions=dimensions, lr=lr)
-        
+
         # DQN
         if "dqn_dimensions" and "dqn_lr" and "dqn_batch_size" and "dqn_sample_size" in kwargs:
             dimensions = kwargs.pop("dqn_dimensions", False)
@@ -96,7 +93,7 @@ class GameWindow:
         pg.display.set_caption('Snake')
 
         self._surface = pg.display.set_mode(
-            (self.length * self.cell_size, self.height * self.cell_size), 
+            (self.length * self.cell_size, self.height * self.cell_size),
             pg.HWSURFACE
         )
         self.grid = Grid(
@@ -116,7 +113,7 @@ class GameWindow:
 
         self.apple_cell_image = pg.transform.scale(
             self.apple_cell_image, (self.cell_size, self.cell_size)).convert_alpha()
-        
+
         self.score = 0
         self.actions = 0
         self._exit = False
@@ -183,16 +180,16 @@ class GameWindow:
             self.grid.apple_is_right_safe(safety_limit)
         ])
 
-        #[up_output, down_output, left_output, right_output] = self.dqn.eval(inputs)
+        # [up_output, down_output, left_output, right_output] = self.dqn.eval(inputs)
         output = self.dqn.eval(inputs)
         if math.isclose(max(output), output[__UP__], rel_tol=1e-9):
-                self.grid.change_direction(Direction.up)
+            self.grid.change_direction(Direction.up)
         elif math.isclose(max(output), output[__DOWN__], rel_tol=1e-9):
-                self.grid.change_direction(Direction.down)
+            self.grid.change_direction(Direction.down)
         elif math.isclose(max(output), output[__LEFT__], rel_tol=1e-9):
-                self.grid.change_direction(Direction.left)
+            self.grid.change_direction(Direction.left)
         else:
-                self.grid.change_direction(Direction.right)
+            self.grid.change_direction(Direction.right)
         print(output)
         print(max(output))
 
@@ -215,7 +212,6 @@ class GameWindow:
         self.actions += 1
         if got_apple:
             self.score += 1
-
 
     def future_move_reward(self, direction):
         old_proximity = self.grid.proximity_to_apple()
@@ -285,8 +281,14 @@ class GameWindow:
                 reward = torch.tensor([1.0])
             elif new_proximity > proximity:
                 reward = torch.tensor([0.8])
-        
+
             self.split_brain_network.update(reward)
+
+    # TODO: Finish this function
+    def perform_QLearn_actions(self, table):
+        prevLoc = self.grid.snake.head()
+        self.grid.change_direction(table.getMax())
+        curLoc = self.grid.snake.head()
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
@@ -312,7 +314,7 @@ class GameWindow:
             self.scores.append(self.score)
             if self.score >= 1:
                 self.averages.append(sum(self.scores) / (len(self.averages) + 1))
-            self.plot_scores()
+            # self.plot_scores()
             self.reset()
 
     def debug_to_console(self):
@@ -353,7 +355,6 @@ class GameWindow:
             pg.event.pump()
             self.clock.tick(self.actions_per_second)
             self.check_for_exit()
-            # This will eventually be replaced with Q table lookup
             self.perform_keyboard_actions()
             self.check_for_end_game()
             self.render()
@@ -377,6 +378,7 @@ class GameWindow:
         self.cleanup()
 
     def play_DQN_game(self):
+        """Runs the main game loop using the Deep Q Network"""
         self.reset()
         while(not self._exit):
             pg.event.pump()
@@ -384,6 +386,22 @@ class GameWindow:
             self.check_for_exit()
             self.handle_keyboard_input()
             self.perform_DQN_actions()
+            self.check_for_end_game()
+            self.render()
+
+        self.cleanup()
+
+    def play_QLEARN_game(self):
+        """Runs the man game loop using Q Learning"""
+        self.reset()
+        table = qTable(self.grid.length, self.grid.height, 0.9, 0.9)
+        while(not self._exit):
+            pg.event.pump()
+            self.clock.tick(self.actions_per_second)
+            self.check_for_exit()
+            self.handle_keyboard_input()
+            # performs the Q learning for the snake
+            self.perform_QLearn_actions(table)
             self.check_for_end_game()
             self.render()
 

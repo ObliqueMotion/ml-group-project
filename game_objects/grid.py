@@ -45,7 +45,6 @@ class Grid:
 
         self.generate_new_apple()
 
-
     def generate_new_apple(self):
         """Generates a new apple in a random position that is not in the Snake or in another apple"""
         x = random.randint(0, self.length - 1)
@@ -70,7 +69,6 @@ class Grid:
 
         if popped_cell is not None:
             self.set_cell(popped_cell, CellType.empty)
-
 
         if self.get_cell(new_x, new_y) == CellType.apple:
             got_apple = True
@@ -100,7 +98,7 @@ class Grid:
         (x, y) = self.snake.head()
         return (
             self.snake.head() in self.snake.tail()
-            or not (0 <= x < self.length) 
+            or not (0 <= x < self.length)
             or not (0 <= y < self.height)
         )
 
@@ -162,7 +160,6 @@ class Grid:
         else:
             return float(count) / float(max_dist)
 
-
     def safe_cells_right(self):
         """Returns the percentage of safe cells directly to the right of the Snake's head relative to the snake's location."""
         (x, y) = self.snake.head()
@@ -179,7 +176,6 @@ class Grid:
         else:
             return float(count) / float(max_dist)
 
-
     def safe_cells_up_global(self):
         """Returns the percentage of safe cells directly above the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
@@ -194,7 +190,6 @@ class Grid:
             return -1.0
         else:
             return float(count) / float(self.height)
-
 
     def safe_cells_down_global(self):
         """Returns the percentage of safe cells directly below the Snake's head relative to the board size."""
@@ -211,7 +206,6 @@ class Grid:
         else:
             return float(count) / float(self.height)
 
-
     def safe_cells_left_global(self):
         """Returns the percentage of safe cells directly to the left of the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
@@ -226,7 +220,6 @@ class Grid:
             return -1.0
         else:
             return float(count) / float(self.length)
-
 
     def safe_cells_right_global(self):
         """Returns the percentage of safe cells directly to the right of the Snake's head relative to the board size."""

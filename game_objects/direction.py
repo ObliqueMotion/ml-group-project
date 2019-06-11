@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # Direction represents the four options that the snake has to move in.
 class Direction(Enum):
     up = 0

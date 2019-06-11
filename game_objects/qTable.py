@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 __X__ = 0
@@ -14,6 +15,10 @@ class qTable():
         self.learnRate = learnRate
         self.discountRate = discountRate
 
+    # prev cell is the prev cell the snake was at
+    # cur cell is the cell the snake moved to
+    # direction is the direction the snake moved to get to cur cell
+    # reward is the reward at cur cell
     def update(self, prevCell, curCell, direction, reward):
         px = prevCell[__X__]
         py = prevCell[__Y__]
@@ -26,10 +31,16 @@ class qTable():
                                           self.table[px * py][direction]))
 
     """coordinate is a list of X and Y located at head of snake"""
+    # Can possibly take the discountRate comparison out for testing purposes
     def getMax(self, coordinate):
-        adjSpaces = self.table[coordinate[__X__] * coordinate[__Y__]]
-        adjSpaces = np.tolist(adjSpaces)
-        """gets the max qtable value from all possible directions for deciding which direction to go"""
-        maxDir = adjSpaces.index(max(adjSpaces))
+        maxDir = None
+        curState = self.table[coordinate[__X__] * coordinate[__Y__]]
+        """if all state elements are equal or we choose to go in random direction"""
+        if random.random() < self.discountRate or np.array_equal(curState, curState):
+            maxDir = random.randint(0, 3)
+        else:
+            curState = np.tolist(curState)
+            """gets the max qtable value from all possible directions for deciding which direction to go"""
+            maxDir = curState.index(max(curState))
         """direction corosponding to the direction enum"""
         return maxDir
