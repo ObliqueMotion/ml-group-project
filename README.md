@@ -11,6 +11,7 @@ https://trello.com/b/Zz6IG6b4/ml-project-spring-2019
 **Instal Dependencies**
 * `pip3 install pygame`
 * `pip3 install torch`
+* `pip3 install matplotlib`
 
 **Run Game**
 * Play a human-controlled game.
