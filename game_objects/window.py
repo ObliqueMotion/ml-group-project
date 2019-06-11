@@ -1,26 +1,48 @@
+import matplotlib
+import matplotlib.pyplot as plt
+import math
+import torch
+import copy
 import pygame as pg
 from pygame.locals import *
 from pygame.color import Color
+from models.split_brain import SplitBrainNetwork
 from game_objects.grid import Grid
 from game_objects.cell import CellType
 from game_objects.direction import Direction
+<<<<<<< HEAD
 from game_objects.qTable import qTable
+=======
+from models.DQN import DQN
+>>>>>>> master
 
 __SNAKE_CELL_PATH__ = "images/white_square.png"
 __APPLE_CELL_PATH__ = "images/green_square.png"
+
+__UP__     = 0
+__DOWN__   = 1
+__LEFT__   = 2
+__RIGHT__  = 3
 
 
 # The GameWindow is responsible for running the main game loop.
 # The GameWindow is responsible for drawing the game state to the screen.
 class GameWindow:
+    dqn = None
     grid = None
     clock = None
+    score = None
+    scores = None
     height = None
     length = None
+    avrages = None
+    actions = None
     surface = None
     cell_size = None
+    is_training = None
+    training_pressed = None
     actions_per_second = None
-    agent = None
+    split_brain_network = None
 
     def __init__(self, **kwargs):
         """Initializes the game window."""
@@ -36,6 +58,36 @@ class GameWindow:
         if 'speed' in kwargs:
             self.actions_per_second = kwargs.pop('speed', False)
         self._exit = False
+        self.is_training = True
+        self.trainig_pressed = False
+        self.score = 0
+        self.actions = 0
+        self.scores = []
+        self.averages = []
+
+        # For split-brain network
+        if "sb_dimensions" and "sb_lr" in kwargs:
+            dimensions = kwargs.pop("sb_dimensions", False)
+            lr = kwargs.pop("sb_lr", False)
+            self.split_brain_network = SplitBrainNetwork(dimensions=dimensions, lr=lr)
+        
+        # DQN
+        if "dqn_dimensions" and "dqn_lr" and "dqn_batch_size" and "dqn_sample_size" in kwargs:
+            dimensions = kwargs.pop("dqn_dimensions", False)
+            lr = kwargs.pop("dqn_lr", False)
+            batch_size = kwargs.pop("dqn_batch_size", False)
+            sample_size = kwargs.pop("dqn_sample_size", False)
+            self.dqn = DQN(dimensions=dimensions, lr=lr, batch_size=batch_size, sample_size=sample_size)
+
+    def plot_scores(self):
+        plt.figure(2)
+        plt.clf()
+        plt.title('Training...')
+        plt.xlabel('Games')
+        plt.ylabel('Score')
+        plt.plot(self.scores)
+        plt.plot(self.averages)
+        plt.pause(0.001)  # pause a bit so that plots are update
 
         self.agent = qTable(self.length, self.height, 0.5, 0.8)
 
@@ -64,7 +116,9 @@ class GameWindow:
 
         self.apple_cell_image = pg.transform.scale(
             self.apple_cell_image, (self.cell_size, self.cell_size)).convert_alpha()
-
+        
+        self.score = 0
+        self.actions = 0
         self._exit = False
 
     def check_for_exit(self):
@@ -94,11 +148,145 @@ class GameWindow:
             self.actions_per_second += 1
         if (keys[K_LEFTBRACKET]):
             self.actions_per_second -= 1
+        if (keys[K_t]):
+            self.is_training = True
+            print("========================================================================")
+            print("Training: ON")
+            print("========================================================================")
+        if (keys[K_s]):
+            self.is_training = False
+            print("========================================================================")
+            print("Training: OFF")
+            print("========================================================================")
 
     def perform_keyboard_actions(self):
         """Executes all relevant game-state changes."""
         self.handle_keyboard_input()
         self.grid.next_frame()
+
+    def perform_DQN_actions(self):
+        proximity = self.grid.proximity_to_apple()
+        safety_limit = 0.5
+        inputs = torch.tensor([
+            proximity,
+            self.grid.safe_cells_up_global(),
+            self.grid.safe_cells_up(),
+            self.grid.apple_is_up_safe(safety_limit),
+            self.grid.safe_cells_down_global(),
+            self.grid.safe_cells_down(),
+            self.grid.apple_is_down_safe(safety_limit),
+            self.grid.safe_cells_left_global(),
+            self.grid.safe_cells_left(),
+            self.grid.apple_is_left_safe(safety_limit),
+            self.grid.safe_cells_right_global(),
+            self.grid.safe_cells_right(),
+            self.grid.apple_is_right_safe(safety_limit)
+        ])
+
+        #[up_output, down_output, left_output, right_output] = self.dqn.eval(inputs)
+        output = self.dqn.eval(inputs)
+        if math.isclose(max(output), output[__UP__], rel_tol=1e-9):
+                self.grid.change_direction(Direction.up)
+        elif math.isclose(max(output), output[__DOWN__], rel_tol=1e-9):
+                self.grid.change_direction(Direction.down)
+        elif math.isclose(max(output), output[__LEFT__], rel_tol=1e-9):
+                self.grid.change_direction(Direction.left)
+        else:
+                self.grid.change_direction(Direction.right)
+        print(output)
+        print(max(output))
+
+        if self.is_training:
+            reward = torch.tensor([
+                self.future_move_reward(Direction.up),
+                self.future_move_reward(Direction.down),
+                self.future_move_reward(Direction.left),
+                self.future_move_reward(Direction.right)
+                # self.grid.safe_cells_up_global(),
+                # self.grid.safe_cells_down_global(),
+                # self.grid.safe_cells_left_global(),
+                # self.grid.safe_cells_right_global()
+            ])
+
+            self.dqn.add_to_replay_memory(inputs, reward)
+            self.dqn.update()
+
+        got_apple = self.grid.next_frame()
+        self.actions += 1
+        if got_apple:
+            self.score += 1
+
+
+    def future_move_reward(self, direction):
+        old_proximity = self.grid.proximity_to_apple()
+        grid = copy.deepcopy(self.grid)
+        grid.change_direction(direction)
+        got_apple = grid.next_frame()
+        safe_cells = grid.safe_cells(direction)
+
+        if grid.snake_died():
+            return -1.0
+        elif got_apple:
+            return 1.0
+        elif grid.proximity_to_apple() > old_proximity and safe_cells >= 0.5:
+            return 0.8
+        else:
+            return 0.5 * safe_cells
+
+    def perform_split_brain_actions(self):
+        """Performs actions using the SplitBrainNetwork."""
+        proximity = self.grid.proximity_to_apple()
+        inputs = [
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_up_global(),
+                    self.grid.safe_cells_up(),
+                    self.grid.apple_is_up_safe(0.5)
+                ]
+            ]),
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_down_global(),
+                    self.grid.safe_cells_down(),
+                    self.grid.apple_is_down_safe(0.5)
+                ]
+            ]),
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_left_global(),
+                    self.grid.safe_cells_left(),
+                    self.grid.apple_is_left_safe(0.5)
+                ]
+            ]),
+            torch.tensor([
+                [
+                    proximity,
+                    self.grid.safe_cells_right_global(),
+                    self.grid.safe_cells_right(),
+                    self.grid.apple_is_right_safe(0.5)
+                ]
+            ])
+        ]
+
+        new_direction = self.split_brain_network.eval(inputs)
+        self.grid.change_direction(new_direction)
+        got_apple = self.grid.next_frame()
+        new_proximity = self.grid.proximity_to_apple()
+
+        if self.is_training:
+            reward = torch.tensor([-0.5])
+
+            if self.grid.snake_died():
+                reward = torch.tensor([-1.0])
+            elif got_apple:
+                reward = torch.tensor([1.0])
+            elif new_proximity > proximity:
+                reward = torch.tensor([0.8])
+        
+            self.split_brain_network.update(reward)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
@@ -121,43 +309,46 @@ class GameWindow:
     def check_for_end_game(self):
         """Checks to see if the snake has died."""
         if self.grid.snake_died():
+            self.scores.append(self.score)
+            if self.score >= 1:
+                self.averages.append(sum(self.scores) / (len(self.averages) + 1))
+            self.plot_scores()
             self.reset()
 
-    def output_to_console(self):
-            vert = None
-            horiz = None
-            if self.grid.apple_is_up():
-                vert = "Up  "
-            elif self.grid.apple_is_down():
-                vert = "Down"
-            else:
-                vert = "None"
-            if self.grid.apple_is_left():
-                horiz = "Left "
-            elif self.grid.apple_is_right():
-                horiz = "Right"
-            else:
-                horiz = "None "
-            print(
-                "Apple is: (", vert, ",", horiz,
-                ")\tProximity: ",
-                str(round(self.grid.proximity_to_apple(), 2)), "\t[x, y]:",
-                self.grid.snake.head(),
-                "   \tUp: (", str(round(self.grid.safe_cells_up(), 2)),
-                ",", str(round(self.grid.safe_cells_up_global(), 2)), ")"
-                "    \tDown: (", str(round(self.grid.safe_cells_down(), 2)),
-                ",", str(round(self.grid.safe_cells_down_global(), 2)), ")"
-                "  \tLeft: (", str(round(self.grid.safe_cells_left(), 2)),
-                ",", str(round(self.grid.safe_cells_left_global(), 2)), ")"
-                "  \tRight: (", str(round(self.grid.safe_cells_right(), 2)),
-                ",", str(round(self.grid.safe_cells_right_global(), 2)), ")"
-            )
+    def debug_to_console(self):
+        """Outputs Debug information to the console."""
+        vert = None
+        horiz = None
+        if self.grid.apple_is_up():
+            vert = "Up  "
+        elif self.grid.apple_is_down():
+            vert = "Down"
+        else:
+            vert = "None"
+        if self.grid.apple_is_left():
+            horiz = "Left "
+        elif self.grid.apple_is_right():
+            horiz = "Right"
+        else:
+            horiz = "None "
+        print(
+            "Apple is: (", vert, ",", horiz,
+            ")\tProximity: ",
+            str(round(self.grid.proximity_to_apple(), 2)), "\t[x, y]:",
+            self.grid.snake.head(),
+            "   \tUp: (", str(round(self.grid.safe_cells_up(), 2)),
+            ",", str(round(self.grid.safe_cells_up_global(), 2)), ")"
+            "    \tDown: (", str(round(self.grid.safe_cells_down(), 2)),
+            ",", str(round(self.grid.safe_cells_down_global(), 2)), ")"
+            "  \tLeft: (", str(round(self.grid.safe_cells_left(), 2)),
+            ",", str(round(self.grid.safe_cells_left_global(), 2)), ")"
+            "  \tRight: (", str(round(self.grid.safe_cells_right(), 2)),
+            ",", str(round(self.grid.safe_cells_right_global(), 2)), ")"
+        )
 
-    def run_game_loop(self):
-        """Runs the main game loop."""
-        if self.reset() == False:
-            self._exit = True
-        print(self.agent.table)
+    def play_keyboard_input_game(self):
+        """Runs the main game loop using player input."""
+        self.reset()
         while(not self._exit):
             pg.event.pump()
             self.clock.tick(self.actions_per_second)
@@ -166,6 +357,34 @@ class GameWindow:
             self.perform_keyboard_actions()
             self.check_for_end_game()
             self.render()
-            self.output_to_console()
+            self.debug_to_console()
+
+        self.cleanup()
+
+    def play_split_brain_network_game(self):
+        """Runs the main game loop using the SplitBrainNetwork."""
+        self.reset()
+        while(not self._exit):
+            pg.event.pump()
+            self.clock.tick(self.actions_per_second)
+            self.check_for_exit()
+            self.handle_keyboard_input()
+            self.perform_split_brain_actions()
+            self.split_brain_network.display_outputs()
+            self.check_for_end_game()
+            self.render()
+
+        self.cleanup()
+
+    def play_DQN_game(self):
+        self.reset()
+        while(not self._exit):
+            pg.event.pump()
+            self.clock.tick(self.actions_per_second)
+            self.check_for_exit()
+            self.handle_keyboard_input()
+            self.perform_DQN_actions()
+            self.check_for_end_game()
+            self.render()
 
         self.cleanup()
