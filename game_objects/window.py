@@ -147,6 +147,10 @@ class GameWindow:
             self.actions_per_second += 1
         if (keys[K_LEFTBRACKET]):
             self.actions_per_second -= 1
+        if (keys[K_a]):
+            self.actions_per_second += 100
+        if (keys[K_z]):
+            self.actions_per_second = 10
         if (keys[K_t]):
             self.is_training = True
             print("========================================================================")
@@ -292,6 +296,10 @@ class GameWindow:
         toApplePrev = self.grid.proximity_to_apple()
         self.grid.snake.direction = table.getMax(prevLoc)
         got_apple = self.grid.next_frame()
+        # table print if g
+        keys = pg.key.get_pressed()
+        if (keys[K_g]):
+            table.Print()
         # if snake died, penalty -10
         if self.grid.snake_died():
             self.num += 1
@@ -310,7 +318,7 @@ class GameWindow:
                 table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=1)
             # if snake got farther to apple, penalty -1
             else:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-1)
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-5)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""

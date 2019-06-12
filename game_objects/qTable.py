@@ -13,6 +13,7 @@ class qTable():
 
     def __init__(self, length, height, learnRate, discountRate):
         self.table = torch.zeros((length, height, 4))
+        torch.set_printoptions(threshold=length*height*4, profile="full")
         self.learnRate = learnRate
         self.discountRate = discountRate
 
@@ -27,6 +28,9 @@ class qTable():
         self.table[px][py][direction] = self.table[px][py][direction] + self.learnRate * (reward + self.discountRate * self.nextAction(curCell) - self.table[px][py][direction])
         # print(self.table[px][py][direction])
 
+    def Print(self):
+        print(self.table)
+        
     def nextAction(self, curCell):
         if curCell is None:
             return 0
