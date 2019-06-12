@@ -307,10 +307,10 @@ class GameWindow:
             toAppleCur = self.grid.proximity_to_apple()
             # if snake got closer to apple, reward 1
             if toApplePrev < toAppleCur:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=5)
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=1)
             # if snake got farther to apple, penalty -1
             else:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-5)
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-1)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
