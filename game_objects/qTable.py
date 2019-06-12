@@ -24,7 +24,8 @@ class qTable():
         px = prevCell[__X__]
         py = prevCell[__Y__]
         """Update current cell with new Q value"""
-        self.table[px * py][direction] = (1 - self.learnRate) * self.table[px * py][direction] + self.learnRate * (reward + self.discountRate * self.nextAction(curCell))
+        self.table[px * py][direction] = self.table[px * py][direction] + self.learnRate * (reward + self.discountRate * self.nextAction(curCell) - self.table[px * py][direction])
+        # print(self.table[px * py][direction])
 
     def nextAction(self, curCell):
         if curCell is None:
@@ -40,7 +41,8 @@ class qTable():
         maxDir = None
         curState = self.table[coordinate[__X__] * coordinate[__Y__]]
         """if all state elements are equal or we choose to go in random direction"""
-        if random.random() < self.discountRate or np.array_equal(curState, curState):
+        """random.random() < self.discountRate or """
+        if np.array_equal(curState, curState):
             maxDir = random.randint(0, 3)
         else:
             curState = np.tolist(curState)

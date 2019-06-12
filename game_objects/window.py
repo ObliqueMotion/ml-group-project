@@ -41,6 +41,7 @@ class GameWindow:
     training_pressed = None
     actions_per_second = None
     split_brain_network = None
+    num = None
 
     def __init__(self, **kwargs):
         """Initializes the game window."""
@@ -293,6 +294,9 @@ class GameWindow:
         got_apple = self.grid.next_frame()
         # if snake died, penalty -10
         if self.grid.snake_died():
+            self.num += 1
+            print("DEAD: " + str(self.num))
+            print("LEN: " + str(len(self.grid.snake.body)))
             table.update(prevCell=prevLoc, curCell=None, direction=self.grid.snake.dir_to_int(), reward=-10)
         # if snake got apple, reward 50
         elif got_apple is True:
@@ -303,10 +307,10 @@ class GameWindow:
             toAppleCur = self.grid.proximity_to_apple()
             # if snake got closer to apple, reward 1
             if toApplePrev < toAppleCur:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=1)
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=5)
             # if snake got farther to apple, penalty -1
             else:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-1)
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-5)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
@@ -413,6 +417,7 @@ class GameWindow:
         """Runs the man game loop using Q Learning"""
         self.reset()
         table = qTable(self.grid.length, self.grid.height, 0.9, 0.9)
+        self.num = 0
         while(not self._exit):
             pg.event.pump()
             self.clock.tick(self.actions_per_second)
