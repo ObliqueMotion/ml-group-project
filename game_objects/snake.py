@@ -11,6 +11,8 @@ class Snake:
     body = None
     direction = None
     increase_length = None
+    hunger = None
+    starvation = None
 
     def __init__(self, **kwargs):
         if 'x' in kwargs and 'y' in kwargs and 'direction' in kwargs:
@@ -25,6 +27,8 @@ class Snake:
                 self.body = [[x + 2, y], [x + 1, y], [x, y]]
             elif self.direction == Direction.right:
                 self.body = [[x - 2, y], [x - 1, y], [x, y]]
+            self.hunger = 100
+            self.starvation = 0
 
         self.increase_length = False
 
@@ -49,6 +53,7 @@ class Snake:
             self.increase_length = False
         else:
             popped_cell = self.body.pop(0)
+        self.starvation += 1
 
         return popped_cell
 

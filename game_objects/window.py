@@ -290,27 +290,34 @@ class GameWindow:
     def perform_QLearn_actions(self, table):
         prevLoc = self.grid.snake.head()
         toApplePrev = self.grid.proximity_to_apple()
-        self.grid.snake.direction = table.getMax(prevLoc)
+        self.grid.snake.direction = table.getMax(prevLoc, self.grid.snake.dir_to_int())
         got_apple = self.grid.next_frame()
+        if self.grid.snake.starvation >= self.grid.snake.hunger:
+            self.num += 1
+            print("DEAD: " + str(self.num))
+            print("LEN: " + str(len(self.grid.snake.body)))
+            table.update(prevCell=prevLoc, curCell=None, direction=self.grid.snake.dir_to_int(), reward=-30)
+            self.reset()
         # if snake died, penalty -10
         if self.grid.snake_died():
             self.num += 1
             print("DEAD: " + str(self.num))
             print("LEN: " + str(len(self.grid.snake.body)))
-            table.update(prevCell=prevLoc, curCell=None, direction=self.grid.snake.dir_to_int(), reward=-10)
+            table.update(prevCell=prevLoc, curCell=None, direction=self.grid.snake.dir_to_int(), reward=-20)
         # if snake got apple, reward 50
         elif got_apple is True:
             curLoc = self.grid.snake.head()
-            table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=50)
+            table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=100)
+            self.grid.snake.starvation = 0
         else:
             curLoc = self.grid.snake.head()
             toAppleCur = self.grid.proximity_to_apple()
             # if snake got closer to apple, reward 1
-            if toApplePrev < toAppleCur:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=5)
+            if toApplePrev <= toAppleCur:
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=10)
             # if snake got farther to apple, penalty -1
             else:
-                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-5)
+                table.update(prevCell=prevLoc, curCell=curLoc, direction=self.grid.snake.dir_to_int(), reward=-10)
 
     def render(self):
         """Draws the changes to the game-state (if any) to the screen."""
