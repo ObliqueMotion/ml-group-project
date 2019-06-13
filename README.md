@@ -18,6 +18,10 @@ https://trello.com/b/Zz6IG6b4/ml-project-spring-2019
     * `python3 keyboard_game.py`
 * Train the split-brain model.
     * `python3 split_brain_game.py`
+* Train the q-learning model.
+    * `python3 qlearning_game.py`
+* Train the deep q-learning model.
+    * `python3 dqn_game.py`
 
 **Controls**
 * Go Up
