@@ -6,6 +6,7 @@ from game_objects.direction import Direction
 __X__ = 0
 __Y__ = 1
 
+
 # Grid is the central controller of the game.
 # The Grid maintains the location of the snake and the apple.
 # The Grid informs the GameWindow what to draw to the screen.
@@ -16,6 +17,7 @@ class Grid:
     height = None
     cells = None
     snake = None
+    rewards = None
 
     def __init__(self, **kwargs):
         """Creates a new 2D grid of cells and adds a random Snake and a random apple."""
@@ -67,7 +69,6 @@ class Grid:
         if popped_cell is not None:
             self.set_cell(popped_cell, CellType.empty)
 
-
         if self.get_cell(new_x, new_y) == CellType.apple:
             got_apple = True
             self.snake.grow()
@@ -96,7 +97,7 @@ class Grid:
         (x, y) = self.snake.head()
         return (
             self.snake.head() in self.snake.tail()
-            or not (0 <= x < self.length) 
+            or not (0 <= x < self.length)
             or not (0 <= y < self.height)
         )
 
@@ -158,7 +159,6 @@ class Grid:
         else:
             return float(count) / float(max_dist)
 
-
     def safe_cells_right(self):
         """Returns the percentage of safe cells directly to the right of the Snake's head relative to the snake's location."""
         (x, y) = self.snake.head()
@@ -175,7 +175,6 @@ class Grid:
         else:
             return float(count) / float(max_dist)
 
-
     def safe_cells_up_global(self):
         """Returns the percentage of safe cells directly above the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
@@ -190,7 +189,6 @@ class Grid:
             return -1.0
         else:
             return float(count) / float(self.height)
-
 
     def safe_cells_down_global(self):
         """Returns the percentage of safe cells directly below the Snake's head relative to the board size."""
@@ -207,7 +205,6 @@ class Grid:
         else:
             return float(count) / float(self.height)
 
-
     def safe_cells_left_global(self):
         """Returns the percentage of safe cells directly to the left of the Snake's head relative to the board size."""
         (x, y) = self.snake.head()
@@ -222,7 +219,6 @@ class Grid:
             return -1.0
         else:
             return float(count) / float(self.length)
-
 
     def safe_cells_right_global(self):
         """Returns the percentage of safe cells directly to the right of the Snake's head relative to the board size."""
